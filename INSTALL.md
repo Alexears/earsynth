@@ -10,17 +10,18 @@ Requires macOS 12 or later. The Universal build supports Apple Silicon, includin
 2. Open **Install earsynth.pkg** inside the image and follow the macOS installation wizard.
 3. Wait for the installation to finish, then reopen your DAW.
 
-The installer places the ready-built plugins and bank automatically in your user account. Terminal, Python and compilation are not required. Installer revision 2 replaces old copies, including copies blocked by the previous installer, and keeps them in the Backups folder.
+The installer places the ready-built plugins and bank automatically for all users, with administrator approval. Terminal, Python and compilation are not required. Installer revision 3 replaces old copies, including copies blocked by the previous installer, and keeps them in the Backups folder.
 
 | Item | Location |
 | --- | --- |
-| VST3 | `~/Library/Audio/Plug-Ins/VST3/Alex Ears/earsynth.vst3` |
-| AU | `~/Library/Audio/Plug-Ins/Components/earsynth.component` |
-| Standalone | `~/Applications/Alex Ears/earsynth.app` |
+| VST3 | `/Library/Audio/Plug-Ins/VST3/Alex Ears/earsynth.vst3` |
+| AU | `/Library/Audio/Plug-Ins/Components/earsynth.component` |
+| Standalone | `/Applications/Alex Ears/earsynth.app` |
 | User presets | `~/Library/Application Support/Alex Ears/earsynth/Presets` |
 | Previous user installations | `~/Library/Application Support/Alex Ears/earsynth/Backups` |
+| Previous system installations | `/Library/Application Support/Alex Ears/earsynth/Backups` |
 
-The build uses ad hoc signing and is not notarized. If macOS blocks the installer, open **System Settings → Privacy & Security → Open Anyway** for this download and confirm. Do not disable Gatekeeper globally.
+The audio bundles use ad hoc signing. The PKG is unsigned and the release is not notarized. If macOS blocks the installer, open **System Settings → Privacy & Security → Open Anyway** for this download and confirm. Do not disable Gatekeeper globally.
 
 If your DAW previously blocked earsynth, close it before reinstalling with this DMG. After installation, reset the earsynth entry in the DAW's plugin manager and scan again if it remains in the blocked list. This installer refreshes the Audio Unit directory after replacement.
 

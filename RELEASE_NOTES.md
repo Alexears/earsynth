@@ -12,9 +12,9 @@
 - Adaptive CPU protection retained for overlapping notes and fast passages.
 - Unified product naming: **earsynth 1.01**, by **Alex Ears**.
 
-## macOS installer revision 2 — 17 October 2026
+## macOS installer revision 3 — 17 October 2026
 
-The DMG now uses the standard macOS PKG installation wizard. The installer replaces old quarantined plugin copies, preserves user presets and refreshes Audio Unit registration. Plugin version remains 1.01; the audio binaries and host identifiers are unchanged.
+The DMG now uses the standard macOS PKG installation wizard. The installer uses the standard system locations, replaces old quarantined plugin copies, preserves user presets and refreshes Audio Unit registration. Plugin version remains 1.01; the audio engine, VST3 identity and AU component codes are unchanged. macOS bundle IDs are distinct for AU and Standalone, and signing/build metadata has been refreshed.
 
 ## Builds
 
