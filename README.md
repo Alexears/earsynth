@@ -16,6 +16,8 @@ Analog and FM synthesis with one MIX control, sound generation, modulation and a
 
 [Complete release ZIP](https://github.com/Alexears/earsynth/releases/download/v1.01/Alex_Ears_earsynth_1.01_Release.zip) · [SHA256 checksums](https://github.com/Alexears/earsynth/releases/download/v1.01/SHA256SUMS.txt)
 
+The macOS DMG contains **Install earsynth.pkg**, a standard macOS installation wizard. Installer revision 2 replaces previously blocked plugin copies and preserves user presets.
+
 ## Factory bank
 
 110 presets, 10 in each category:

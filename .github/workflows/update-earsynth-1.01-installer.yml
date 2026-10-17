@@ -1,0 +1,78 @@
+name: Update earsynth 1.01 macOS installer
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/update-earsynth-1.01-installer.yml]
+permissions:
+  contents: write
+concurrency:
+  group: earsynth-public-installer-revision2
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify and restore the approved release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,io,json,pathlib,urllib.request,zipfile
+          spec=json.loads(pathlib.Path('release-inputs.json').read_text())
+          assert (spec['product'],spec['version'],spec['vendor'],spec['installer_revision'])==('earsynth','1.01','Alex Ears',2)
+          with urllib.request.urlopen(spec['artifact']['url'],timeout=90) as response:data=response.read()
+          assert len(data)==spec['artifact']['size_bytes'] and hashlib.sha256(data).hexdigest()==spec['artifact']['sha256']
+          bundle=spec['bundle']
+          with zipfile.ZipFile(io.BytesIO(data)) as outer:
+              assert outer.namelist()==[bundle['name']]
+              content=outer.read(bundle['name'])
+          assert len(content)==bundle['size_bytes'] and hashlib.sha256(content).hexdigest()==bundle['sha256']
+          out=pathlib.Path('dist');out.mkdir();(out/bundle['name']).write_bytes(content)
+          with zipfile.ZipFile(io.BytesIO(content)) as archive:
+              allowed={'earsynth_1.01_Release/'+a['relative_path'] for a in spec['platform_assets']}
+              allowed|={'earsynth_1.01_Release/README_RU.txt','earsynth_1.01_Release/SHA256SUMS.txt'}
+              assert set(archive.namelist())==allowed and len(archive.namelist())==7 and archive.testzip() is None
+              for entry in spec['platform_assets']:
+                  name=entry['name']
+                  assert pathlib.PurePosixPath(name).name==name and name.startswith('Alex_Ears_earsynth_1.01_')
+                  payload=archive.read('earsynth_1.01_Release/'+entry['relative_path'])
+                  assert len(payload)==entry['size_bytes'] and hashlib.sha256(payload).hexdigest()==entry['sha256']
+                  (out/name).write_bytes(payload)
+          checks=''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(out.iterdir()))
+          (out/'SHA256SUMS.txt').write_text(checks)
+          actual={p.name:(p.stat().st_size,hashlib.sha256(p.read_bytes()).hexdigest()) for p in out.iterdir()}
+          assert actual=={a['name']:(a['size_bytes'],a['sha256']) for a in spec['assets']} and len(actual)==7
+          print('All seven release files match approved SHA256 and sizes.')
+          PY
+      - name: Replace the verified macOS installer and bundles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/v1.01" > before-release.json
+          python3 - <<'PY'
+          import json,pathlib
+          spec=json.loads(pathlib.Path('release-inputs.json').read_text())
+          current=json.loads(pathlib.Path('before-release.json').read_text())
+          assert current['tag_name']=='v1.01' and not current['draft'] and not current['prerelease'] and not current.get('immutable',False)
+          entries=lambda a:{e['name']:(e['size_bytes'],'sha256:'+e['sha256']) for e in a}
+          assert {a['name']:(a['size'],a['digest']) for a in current['assets']} in [entries(spec['previous_assets']),entries(spec['assets'])]
+          PY
+          gh release upload v1.01 dist/Alex_Ears_earsynth_1.01_macOS_Universal.dmg dist/Alex_Ears_earsynth_1.01_Release.zip dist/SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit v1.01 --repo "$GITHUB_REPOSITORY" --notes-file RELEASE_NOTES.md --latest
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/v1.01" > after-release.json
+          python3 - <<'PY'
+          import json,pathlib
+          spec=json.loads(pathlib.Path('release-inputs.json').read_text())
+          before=json.loads(pathlib.Path('before-release.json').read_text())
+          after=json.loads(pathlib.Path('after-release.json').read_text())
+          assert not after['draft'] and not after['prerelease']
+          assert {a['name']:(a['size'],a['digest']) for a in after['assets']}=={a['name']:(a['size_bytes'],'sha256:'+a['sha256']) for a in spec['assets']}
+          assert all(a['state']=='uploaded' for a in after['assets'])
+          stable=lambda report:{a['name']:a['id'] for a in report['assets'] if '_Windows_' in a['name'] or '_Linux_' in a['name']}
+          assert stable(before)==stable(after)
+          print('Installer revision 2 is public; all seven assets verified.')
+          PY

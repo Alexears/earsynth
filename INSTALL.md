@@ -7,10 +7,10 @@ Close your DAW before installation. The factory bank is built into the plugin; n
 Requires macOS 12 or later. The Universal build supports Apple Silicon, including M1, and Intel.
 
 1. Download and open the DMG.
-2. Open **Install earsynth.app** inside the image.
-3. Wait for the success message, then reopen your DAW.
+2. Open **Install earsynth.pkg** inside the image and follow the macOS installation wizard.
+3. Wait for the installation to finish, then reopen your DAW.
 
-The installer places the ready-built plugins and bank automatically. Terminal, Python and compilation are not required.
+The installer places the ready-built plugins and bank automatically in your user account. Terminal, Python and compilation are not required. Installer revision 2 replaces old copies, including copies blocked by the previous installer, and keeps them in the Backups folder.
 
 | Item | Location |
 | --- | --- |
@@ -21,6 +21,8 @@ The installer places the ready-built plugins and bank automatically. Terminal, P
 | Previous user installations | `~/Library/Application Support/Alex Ears/earsynth/Backups` |
 
 The build uses ad hoc signing and is not notarized. If macOS blocks the installer, open **System Settings → Privacy & Security → Open Anyway** for this download and confirm. Do not disable Gatekeeper globally.
+
+If your DAW previously blocked earsynth, close it before reinstalling with this DMG. After installation, reset the earsynth entry in the DAW's plugin manager and scan again if it remains in the blocked list. This installer refreshes the Audio Unit directory after replacement.
 
 ## Windows
 
